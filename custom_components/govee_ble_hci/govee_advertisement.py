@@ -129,6 +129,13 @@ class GoveeAdvertisement:
                 self.humidity = float(hum / 100.0)
                 self.battery = int(batt)
                 self.model = "Govee H5074/H5051"
+            elif self.check_is_gvh5174():
+                mfg_data_5174 = hex_string(self.mfg_data[2:5]).replace(" ", "")
+                self.packet = int(mfg_data_5174, 16)
+                self.temperature = decode_temps(self.packet)
+                self.humidity = float((self.packet % 1000) / 10)
+                self.battery = int(self.mfg_data[5])
+                self.model = "Govee H5174"
         except (ValueError, IndexError):
             pass
 
@@ -151,6 +158,10 @@ class GoveeAdvertisement:
     def check_is_gvh5179(self) -> bool:
         """Check if mfg data is that of Govee H5179."""
         return self._mfg_data_check(11, 6) and self._mfg_data_id_check("0188")
+
+    def check_is_gvh5174(self) -> bool:
+        """Check if mfg data is that of Govee H5174."""
+        return self._mfg_data_check(6, 1)
 
     def _mfg_data_check(self, data_length: int, flags: int) -> bool:
         """Check if mfg data is of a certain length with the correct flag."""
